@@ -212,7 +212,13 @@ class Player:
 
     def stop(self):
         self.is_playing = False
-        self._ipc('stop')
+        self._playing -= 1
+        self._ipc('set_property', 'pause', True)
+
+    def resume(self):
+        self.is_playing = True
+        self._playing += 1
+        self._ipc('set_property', 'pause', False)
 
     def _play(self):
         if not self.path:
@@ -235,12 +241,13 @@ class Player:
         self.length = 0
         self._seek_step = 0
         self._play()
+        self._ipc('set_property', 'pause', False)
 
     def toggle(self):
         if self.is_playing:
             self.stop()
         elif self.path:
-            self._play()
+            self.resume()
 
     def seek(self, direction):
         d = direction * self.length * 0.002
